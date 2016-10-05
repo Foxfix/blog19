@@ -1,27 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% load urlify %}
+{% load crispy_forms_tags %}
+{% block head %} {{ instance.title }} | {{ block.super }} {% endblock %}
 
-<body>
-{% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-
-
-   <h1>{{title}} </h1> 
+{% block content %}
+<div class="col-sm-6 col-sm-offset-3">
+    <p></p>
+    {% if instance.image %}
+    <img src="{{ instance.image.url }}" class="img-responsive"/>
+    {% endif %}
 
 
-   {{ instance.title}} </br>
-   {{ instance.content}} </br>
-   {{ instance.timestamp}} </br>
-   {{ instance.updated}} </br>
-   {{ instance.id}} </br>
+    {# пометили Draft/черновик статьи.  #}
+    {# timestamp заменили на publish #}
+    <h1> {{ title }} <small> {% if instance.draft %}<span style="color:red">Draft</span>{% endif %}
+        {{ instance.publish }} </small></h1> 
 
+    <!-- Вводим ограничение, автор выводится в статье, если в его профиле 
+    полное имя First name/Last name. Выведет автор "Piliaewa Olga"-->
+    {% if instance.user.get_full_name %}
+    <p>Author: {{ instance.user.get_full_name }}</p>
+    {% endif %} <!--<p>Author: {{ instance.user }}</p> Выведет просто имя автора "olga"-->
 
+    <p> <!-- Лайки и подписка фейсбука -->
+        <div class="fb-like" data-href="{{ request.build_absolute_uri }}" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    </p>
 
+    
+    <p> <!-- поделиться в сетях -->
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}">Facebook</a>
 
-</body>
-</html>
+        <a href="https://twitter.com/home?status={{ instance.content|urlify }}%20{{ request.build_absolute_uri }}">
+            Twitter
+        </a>
+
+        <a href="https://plus.google.com/share?url={{ request.build_absolute_uri }}">Google+</a>
+
+        <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}&title={{ instance.title }}&summary={{ share_string }}&source={{ request.build_absolute_uri }}">LinkedIn</a>
+    </p>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="post-detail-item"> {{ instance.get_markdown}} </div> 
+
+            <hr>
+            </br>
+
+            <div>
+                <p class="lead">Comments</p>
+                <form method="POST" action=".">{% csrf_token %}
+                    {{ comment_form|crispy }}
+                    <input type="submit" value="Post comment" class='btn btn-default'>
+                </form>
+                {% for comment in comments %}
+                <blockquote>
+                <p>{{ comment.content }}</p>
+                    <footer>via {{ comment.user }} | {{ comment.timestamp|timesince }} ago</footer>
+                    <hr> 
+                </blockquote>
+                <hr>
+                {% endfor %}
+            </div>
+
+            <!-- Комменты фейсбука -->
+            <div class="fb-comments" data-href="{{ request.build_absolute_uri }}" data-numposts="5">
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+

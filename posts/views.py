@@ -1,4 +1,3 @@
-
 #-*- coding: utf-8 -*-
 
 try:
@@ -17,7 +16,7 @@ from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
@@ -52,7 +51,7 @@ def post_detail(request, slug=None):
     if instance.publish > timezone.now().date() or instance.draft:
         if not request.user.is_staff or not request.user.is_superuser:
             raise Http404
-    share_string = quote_plus(instance.content)
+    share_string = quote_plus(u'instance.content')
 
     # print(get_read_time(instance.content))
     print(get_read_time(instance.get_markdown()))

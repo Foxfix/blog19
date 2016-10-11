@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 """
 WSGI config for trydjango19 project.
 
